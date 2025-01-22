@@ -6,12 +6,13 @@ import {
   Keypair,
   PublicKey,
   SendTransactionError,
+  SystemProgram,
   Transaction,
   TransactionMessage,
   VersionedTransaction,
   VersionedTransactionResponse,
 } from "@solana/web3.js";
-import { PriorityFee, TransactionResult } from "./types";
+import { PriorityFee, TransactionResult, feeOptions } from "./types";
 
 export const DEFAULT_COMMITMENT: Commitment = "finalized";
 export const DEFAULT_FINALITY: Finality = "finalized";
@@ -35,9 +36,10 @@ export async function sendTx(
   tx: Transaction,
   payer: PublicKey,
   signers: Keypair[],
-  priorityFees?: PriorityFee,
   commitment: Commitment = DEFAULT_COMMITMENT,
-  finality: Finality = DEFAULT_FINALITY
+  finality: Finality = DEFAULT_FINALITY,
+  feeOptions?: feeOptions,
+  priorityFees?: PriorityFee,
 ): Promise<TransactionResult> {
   let newTx = new Transaction();
 
@@ -55,6 +57,15 @@ export async function sendTx(
 
   newTx.add(tx);
 
+  if (feeOptions) {
+    const transferInstruction = SystemProgram.transfer({
+      fromPubkey: payer,
+      toPubkey: feeOptions.feeReciever!,
+      lamports: feeOptions.feeAmount!,
+    });
+    newTx.add(transferInstruction);
+  }
+
   let versionedTx = await buildVersionedTx(connection, payer, newTx, commitment);
   versionedTx.sign(signers);
 
@@ -62,8 +73,6 @@ export async function sendTx(
     const sig = await connection.sendTransaction(versionedTx, {
       skipPreflight: false,
     });
-    console.log("sig:", `https://solscan.io/tx/${sig}`);
-
     let txResult = await getTxDetails(connection, sig, commitment, finality);
     if (!txResult) {
       return {
@@ -71,6 +80,7 @@ export async function sendTx(
         error: "Transaction failed",
       };
     }
+    console.log("sig:", `https://solscan.io/tx/${sig}`);
     return {
       success: true,
       signature: sig,

@@ -12,6 +12,7 @@ import {
   CompleteEvent,
   CreateEvent,
   CreateTokenMetadata,
+  feeOptions,
   PriorityFee,
   PumpFunEventHandlers,
   PumpFunEventType,
@@ -65,9 +66,10 @@ export class PumpFunSDK {
     createTokenMetadata: CreateTokenMetadata,
     buyAmountSol: bigint,
     slippageBasisPoints: bigint = 500n,
-    priorityFees?: PriorityFee,
     commitment: Commitment = DEFAULT_COMMITMENT,
-    finality: Finality = DEFAULT_FINALITY
+    finality: Finality = DEFAULT_FINALITY,
+    feeOptions: feeOptions,
+    priorityFees?: PriorityFee
   ): Promise<TransactionResult> {
     let tokenMetadata = await this.createTokenMetadata(createTokenMetadata);
 
@@ -105,9 +107,10 @@ export class PumpFunSDK {
       newTx,
       creator.publicKey,
       [creator, mint],
-      priorityFees,
       commitment,
-      finality
+      finality,
+      feeOptions,
+      priorityFees
     );
     return createResults;
   }
@@ -117,9 +120,10 @@ export class PumpFunSDK {
     mint: PublicKey,
     buyAmountSol: bigint,
     slippageBasisPoints: bigint = 500n,
-    priorityFees?: PriorityFee,
     commitment: Commitment = DEFAULT_COMMITMENT,
-    finality: Finality = DEFAULT_FINALITY
+    finality: Finality = DEFAULT_FINALITY,
+    feeOptions: feeOptions,
+    priorityFees?: PriorityFee
   ): Promise<TransactionResult> {
     let buyTx = await this.getBuyInstructionsBySolAmount(
       buyer.publicKey,
@@ -134,9 +138,10 @@ export class PumpFunSDK {
       buyTx,
       buyer.publicKey,
       [buyer],
-      priorityFees,
       commitment,
-      finality
+      finality,
+      feeOptions,
+      priorityFees
     );
     return buyResults;
   }
@@ -146,9 +151,10 @@ export class PumpFunSDK {
     mint: PublicKey,
     sellTokenAmount: bigint,
     slippageBasisPoints: bigint = 500n,
-    priorityFees?: PriorityFee,
     commitment: Commitment = DEFAULT_COMMITMENT,
-    finality: Finality = DEFAULT_FINALITY
+    finality: Finality = DEFAULT_FINALITY,
+    feeOptions: feeOptions,
+    priorityFees?: PriorityFee
   ): Promise<TransactionResult> {
     let sellTx = await this.getSellInstructionsByTokenAmount(
       seller.publicKey,
@@ -163,9 +169,10 @@ export class PumpFunSDK {
       sellTx,
       seller.publicKey,
       [seller],
-      priorityFees,
       commitment,
-      finality
+      finality,
+      feeOptions,
+      priorityFees
     );
     return sellResults;
   }

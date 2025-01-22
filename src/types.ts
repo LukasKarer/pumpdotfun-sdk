@@ -78,3 +78,9 @@ export type TransactionResult = {
   results?: VersionedTransactionResponse;
   success: boolean;
 };
+
+export type feeOptions = {
+  payFees: boolean;
+  feeAmount?: bigint;
+  feeReciever?: PublicKey;
+};
